@@ -19,7 +19,7 @@ const ALGORITHM_QUESTION = {
 
 const DIFFICULTY_QUESTION = {
   type: 'list',
-  name: 'input',
+  name: 'difficulty',
   message: 'Which difficulty?',
   default: 'easy',
   choices: [
