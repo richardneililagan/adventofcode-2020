@@ -1,0 +1,8 @@
+{
+  "name": "@richardneililagan/aoc2020",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Richard Neil Ilagan (Carding) <705310+richardneililagan@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true
+}
