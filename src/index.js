@@ -73,7 +73,7 @@ const __benchmark = async () => {
   console.clear()
   console.log('Benchmarking:', chalk.yellowBright(`[${algorithm.name}]`), '\n')
 
-  const PROFILE_LENGTH = 1000
+  const PROFILE_LENGTH = 100
   const tasks = Array(PROFILE_LENGTH)
     .fill(0)
     .map(async () => {
@@ -86,13 +86,12 @@ const __benchmark = async () => {
 
   const times = await Promise.all(tasks)
   const p95times = [...times].slice(
-    ~~((PROFILE_LENGTH * 0.05) / 2),
-    times.length - ~~((PROFILE_LENGTH * 0.05) / 2)
+    ~~((PROFILE_LENGTH * 0.1) / 2),
+    times.length - ~~((PROFILE_LENGTH * 0.1) / 2)
   )
-  console.debug(p95times.length)
 
   const average = p95times.reduce((a, v) => a + v, 0) / p95times.length
-  console.log(`95p average over ${times.length} runs:`, average)
+  console.log(`95p average over ${times.length} runs:`, average, '\n')
 }
 
 module.exports = { run: __run, benchmark: __benchmark }
