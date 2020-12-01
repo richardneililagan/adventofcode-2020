@@ -1,8 +1,21 @@
 {
   "name": "@richardneililagan/aoc2020",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
+  "bin": {
+    "aoc": "./bin/run"
+  },
   "author": "Richard Neil Ilagan (Carding) <705310+richardneililagan@users.noreply.github.com>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "lint": "eslint './src/**/*.{js,jsx,ts,tsx}' -f stylish"
+  },
+  "devDependencies": {
+    "eslint": "7.14.0",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-plugin-prettier": "3.1.4",
+    "eslint-plugin-unicorn": "23.0.0",
+    "prettier": "2.2.1"
+  }
 }

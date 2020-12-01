@@ -1,0 +1,21 @@
+---
+parserOptions:
+  sourceType: module
+
+env:
+  node: true
+  es2020: true
+  
+extends:
+  - plugin:unicorn/recommended
+  - plugin:prettier/recommended
+  - prettier/unicorn
+
+rules:
+  unicorn/prevent-abbreviations:
+    - error
+    - whitelist:
+        env: true
+        props: true
+        ref: true
+        param: true
