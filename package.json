@@ -10,7 +10,8 @@
   "private": true,
   "scripts": {
     "test": "jest",
-    "lint": "eslint './src/**/*.{js,jsx,ts,tsx}' -f stylish"
+    "lint": "eslint './src/**/*.{js,jsx,ts,tsx}' -f stylish",
+    "benchmark": "node ./src/benchmark"
   },
   "devDependencies": {
     "eslint": "7.14.0",

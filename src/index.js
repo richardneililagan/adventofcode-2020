@@ -62,4 +62,37 @@ const __run = async () => {
   )
 }
 
-module.exports.run = __run
+const __benchmark = async () => {
+  console.clear()
+
+  const { algorithm, difficulty } = await inquirer.prompt([
+    ALGORITHM_QUESTION,
+    DIFFICULTY_QUESTION,
+  ])
+
+  console.clear()
+  console.log('Benchmarking:', chalk.yellowBright(`[${algorithm.name}]`), '\n')
+
+  const PROFILE_LENGTH = 1000
+  const tasks = Array(PROFILE_LENGTH)
+    .fill(0)
+    .map(async () => {
+      const timer = process.hrtime()
+      await algorithm.solver(difficulty)
+
+      const [seconds, nanos] = process.hrtime(timer)
+      return seconds + nanos / 1e9
+    })
+
+  const times = await Promise.all(tasks)
+  const p95times = [...times].slice(
+    ~~((PROFILE_LENGTH * 0.05) / 2),
+    times.length - ~~((PROFILE_LENGTH * 0.05) / 2)
+  )
+  console.debug(p95times.length)
+
+  const average = p95times.reduce((a, v) => a + v, 0) / p95times.length
+  console.log(`95p average over ${times.length} runs:`, average)
+}
+
+module.exports = { run: __run, benchmark: __benchmark }
