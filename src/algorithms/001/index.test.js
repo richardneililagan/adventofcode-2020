@@ -9,7 +9,12 @@ jest.mock('../../helpers/files', () => ({
 
 // :: ---
 
-it('runs a test', async () => {
-  const answer = await solver('test')
+it('solves the easy example', async () => {
+  const answer = await solver('easy')
   expect(answer).toBe(514579)
+})
+
+it('solves the hard example', async () => {
+  const answer = await solver('hard')
+  expect(answer).toBe(241861950)
 })
