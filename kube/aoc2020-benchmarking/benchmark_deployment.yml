@@ -36,12 +36,16 @@ spec:
         # :: actual solver process
         - name: benchmarkprocess
           image: '214400071163.dkr.ecr.ap-southeast-1.amazonaws.com/aoc2020:latest'
+          env:
+            - name: PROBLEM_ID
+              value: '001'
+            - name: DIFFICULTY
+              value: hard
           command: ['sh', '-c']
-          # args: ['001', 'easy', '>>', '/var/log/containers/application.log']
           args:
             - >
               while true;
-              do echo "Time: $(date) $(node /app/src/benchmark 001 easy)" | tee -a /var/log/containers/application.log;
+              do echo "[AOC2020BENCHMARK] $(PROBLEM_ID) $(DIFFICULTY) $(node /app/src/benchmark $PROBLEM_ID $DIFFICULTY)" | tee -a /var/log/containers/application.log;
               sleep 1;
               done;
           volumeMounts:
@@ -52,21 +56,23 @@ spec:
             readOnlyRootFilesystem: false
             allowPrivilegeEscalation: false
 
-        # - name: logrotate
-        #   image: realz/logrotate
-        #   volumeMounts:
-        #     - mountPath: /var/log/containers
-        #       name: app-logs
-        #   env:
-        #     - name: CRON_EXPR
-        #       value: '*/15 * * * *'
-        #     - name: LOGROTATE_LOGFILES
-        #       value: '/var/log/containers/*.log'
-        #     - name: LOGROTATE_FILESIZE
-        #       value: '50M'
-        #     - name: LOGROTATE_FILENUM
-        #       value: '1'
+        # :: help ensure we don't run out of pod space
+        - name: logrotate
+          image: realz/logrotate
+          volumeMounts:
+            - mountPath: /var/log/containers
+              name: app-logs
+          env:
+            - name: CRON_EXPR
+              value: '*/15 * * * *'
+            - name: LOGROTATE_LOGFILES
+              value: '/var/log/containers/*.log'
+            - name: LOGROTATE_FILESIZE
+              value: '50M'
+            - name: LOGROTATE_FILENUM
+              value: '1'
 
+        # :: sidecar proxy to ship logs to Amazon CloudWatch
         - name: fluentd
           image: fluent/fluentd-kubernetes-daemonset:v1.9.3-debian-cloudwatch-1.0
           env:
