@@ -17,6 +17,6 @@ it('solves the easy example', async () => {
 })
 
 it('solves the hard example', async () => {
-  // const answer = await solver('hard')
-  // expect(answer).toBe(0)
+  const answer = await solver('hard')
+  expect(answer).toBe(1)
 })
