@@ -10,7 +10,7 @@ if ! [[ -x "$(command -v kubectl)" && -x "$(command -v eksctl)" && -x "$(command
 fi
 
 # :: Create an EKS Fargate cluster
-eksctl create cluster --name adventofcode2020 --fargate
+eksctl create cluster --name testcluster --fargate
 
 # :: Create a dedicated namespace for the benchmarking pods
 #    and a Fargate profile for the namespace.
@@ -18,19 +18,19 @@ eksctl create cluster --name adventofcode2020 --fargate
 kubectl create namespace aoc2020-benchmarking
 eksctl create fargateprofile \
   --namespace aoc2020-benchmarking \
-  --cluster adventofcode2020 \
+  --cluster testcluster \
   --name aoc2020-benchmarking
 
 # :: Create an IAM OIDC for this cluster
 eksctl utils associate-iam-oidc-provider \
-  --cluster adventofcode2020 \
+  --cluster testcluster \
   --approve
 
 # :: Create an IAM role and Kubernetes service account
 #    for Fluentd to use. This should allow Fluentd to send logs to CloudWatch.
 eksctl create iamserviceaccount \
-  --name benchmarking-sa \
+  --name benchmarkingserviceaccount \
   --namespace aoc2020-benchmarking \
-  --cluster adventofcode2020 \
+  --cluster testcluster \
   --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
   --approve

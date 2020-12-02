@@ -1,17 +1,86 @@
 ---
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 
 metadata:
   name: benchmarking
+  namespace: aoc2020-benchmarking
 
 spec:
-  backoffLimit: 4
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appfluentd
+      k8s-app: fluentd-cloudwatch
+
   template:
+    metadata:
+      labels:
+        app: appfluentd
+        k8s-app: fluentd-cloudwatch
+      annotations:
+        iam.amazonaws.com/role: benchmarkingserviceaccount
+
     spec:
-      restartPolicy: Never
+      serviceAccount: benchmarkingserviceaccount
+      serviceAccountName: benchmarkingserviceaccount
+
+      volumes:
+        - name: fluentdconf
+          configMap:
+            name: fluentd-spring-config
+        - name: app-logs
+          emptyDir: {}
+
       containers:
+        # :: actual solver process
         - name: benchmarkprocess
           image: '214400071163.dkr.ecr.ap-southeast-1.amazonaws.com/aoc2020:latest'
-          command: ['/usr/local/bin/node', '/app/src/benchmark']
-          args: ['001', 'easy']
+          command: ['sh', '-c']
+          # args: ['001', 'easy', '>>', '/var/log/containers/application.log']
+          args:
+            - >
+              while true;
+              do echo "Time: $(date) $(node /app/src/benchmark 001 easy)" | tee -a /var/log/containers/application.log;
+              sleep 1;
+              done;
+          volumeMounts:
+            - mountPath: /var/log/containers
+              name: app-logs
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+
+        # - name: logrotate
+        #   image: realz/logrotate
+        #   volumeMounts:
+        #     - mountPath: /var/log/containers
+        #       name: app-logs
+        #   env:
+        #     - name: CRON_EXPR
+        #       value: '*/15 * * * *'
+        #     - name: LOGROTATE_LOGFILES
+        #       value: '/var/log/containers/*.log'
+        #     - name: LOGROTATE_FILESIZE
+        #       value: '50M'
+        #     - name: LOGROTATE_FILENUM
+        #       value: '1'
+
+        - name: fluentd
+          image: fluent/fluentd-kubernetes-daemonset:v1.9.3-debian-cloudwatch-1.0
+          env:
+            - name: REGION
+              value: ap-southeast-1
+            - name: AWS_REGION
+              value: ap-southeast-1
+            - name: CLUSTER_NAME
+              value: testcluster
+            - name: CI_VERSION
+              value: 'k8s/1.0.1'
+
+          volumeMounts:
+            - name: fluentdconf
+              mountPath: /fluentd/etc
+            - name: app-logs
+              mountPath: /var/log/containers
