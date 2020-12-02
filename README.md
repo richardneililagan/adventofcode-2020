@@ -7,7 +7,7 @@ for [Advent of Code 2020][aoc2020].
 
 The actual solutions are found in the [`src/algorithms`](src/algorithms) folder.
 
-## In the spirit of gross overengineering
+### In the spirit of gross overengineering
 
 A huge shitton of this codebase is scaffolding to run the actual solutions.
 Please don't mind the cruft.
