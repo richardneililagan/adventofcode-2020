@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: profiler
+  namespace: benchmarking
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: profiler
+
+  # :: pod template ---
+  template:
+    metadata:
+      labels:
+        app: profiler
+
+    spec:
+      containers:
+        - name: benchmarkprocess
+          image: '214400071163.dkr.ecr.ap-southeast-1.amazonaws.com/aoc2020:latest'
+          env:
+            - name: PROBLEM_ID
+              value: '001'
+            - name: DIFFICULTY
+              value: hard
+
+          command: ['sh', '-c']
+          args:
+            - >
+              while true;
+              do node /app/src/benchmark $PROBLEM_ID $DIFFICULTY
+              sleep 1;
+              done;
