@@ -30,8 +30,8 @@ roleRef:
 
 subjects:
   - kind: ServiceAccount
-    name: logdemo-sa
-    namespace: logdemo
+    name: benchmarkingserviceaccount
+    namespace: aoc2020-benchmarking
 
 ---
 apiVersion: v1
@@ -76,7 +76,7 @@ data:
         @type record_transformer
         @id filter_containers_stream_transformer
         <record>
-          stream_name springlogs #
+          stream_name benchmarklogs #
         </record>
       </filter>
 
@@ -100,7 +100,7 @@ data:
         @type cloudwatch_logs
         @id out_cloudwatch_logs_containers
         region "#{ENV.fetch('REGION')}"
-        log_group_name "/aws/containerinsights/#{ENV.fetch('CLUSTER_NAME')}/springapp"
+        log_group_name "/aws/containerinsights/#{ENV.fetch('CLUSTER_NAME')}/aoc2020benchmarks"
         log_stream_name_key stream_name
         remove_log_stream_name_key true
         auto_create_stream true
