@@ -42,7 +42,30 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  // :: TODO
+  // :: essentially the same algorithm,
+  //    iterated across a number of slopes into a product
+  const SLOPES = [
+    [1, 1],
+    [3, 1],
+    [5, 1],
+    [7, 1],
+    [1, 2],
+  ]
+
+  const product = SLOPES.reduce((a, [sx, sy]) => {
+    const locations = []
+    for (let x = sx, y = sy; y < lines.length; x += sx, y += sy)
+      locations.push([x, y])
+
+    return (
+      a *
+      locations
+        .map(([x, y]) => lines[y][x % lines[y].length])
+        .filter((f) => f === '#').length
+    )
+  }, 1)
+
+  return product
 }
 
 module.exports = {
