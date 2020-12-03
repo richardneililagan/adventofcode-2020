@@ -7,11 +7,6 @@ for [Advent of Code 2020][aoc2020].
 
 The actual solutions are found in the [`src/algorithms`](src/algorithms) folder.
 
-### In the spirit of gross overengineering
-
-A huge shitton of this codebase is scaffolding to run the actual solutions.
-Please don't mind the cruft.
-
 ## Running
 
 ```bash
@@ -22,7 +17,65 @@ yarn link # :: or npm link
 aoc
 ```
 
-## Benchmarks
+---
+
+## In the spirit of gross overengineering
+
+A huge shitton of this codebase is scaffolding to run the actual solutions.
+Please don't mind the cruft.
+
+### Docker
+
+Included is a `Dockerfile` that builds the codebase into an image meant for quick
+answers or profiling.
+
+As it stands, you can execute it, providing a (3-digit) `PROBLEM_ID` and a `DIFFICULTY`
+(either **easy** or **hard**), and it'll just go.
+
+```bash
+docker build -t richardneililagan/aoc2020:latest .
+
+# :: docker run <image> <PROBLEM_ID> <DIFFICULTY>
+docker run --rm richardneililagan/aoc2020 001 easy
+> 001 easy 786811 0.007324444 0
+# :: PROBLEM_ID DIFFICULTY ANSWER TIME_TAKEN JUST_A_ZERO
+```
+
+### Kubernetes
+
+This codebase includes a script to spin up a [Kubernetes][k8s] cluster on
+[Amazon EKS][eks] using the [AWS Fargate][fargate] configuration.
+
+[A script][eksscript] is included that will (should?) spin up your Kubernetes cluster
+on AWS. Note that the manifest files included are hard-coded to use my images ---
+however, there's really only one place that is used, and that is on the
+benchmarking deployment manifest.
+
+> **Note to self**: make the image name dynamic.
+
+Just be sure you change it up!
+
+Once you have a cluster up, you can set up the deployment:
+
+```bash
+kubectl apply -f ./kube/benchmarking/profiler-deployment.yaml
+```
+
+The cluster as configured will ship logs to an [Amazon Kinesis Firehose][firehose]
+delivery stream, which then should allow me to gather metrics from the solutions
+into some nice visualizations.
+
+> TODO: Metrics collection + projection
+
+> TODO: Metrics visualizations
+
+### Why?
+
+Why not?
+
+---
+
+### Benchmarks
 
 ```bash
 yarn benchmark # :: or npm run benchmark
@@ -54,3 +107,8 @@ Times in seconds.
 [twitter]: https://twitter.com/techlifemusic
 [website]: https://richardneililagan.com
 [graviton]: https://aws.amazon.com/ec2/graviton
+[eksscript]: ./kube/initcluster.sh
+[k8s]: https://kubernetes.io
+[eks]: https://aws.amazon.com/eks
+[fargate]: https://aws.amazon.com/fargate
+[firehose]: https://aws.amazon.com/kinesis/data-firehose
