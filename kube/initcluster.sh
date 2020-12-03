@@ -3,6 +3,12 @@
 # :: initializes an EKS Fargate cluster on AWS.
 
 # :: IMPORTANT:
+#    This k8s cluster is configured to send pod log records to a Kinesis Firehose
+#    delivery stream named `aoc2020-benchmarking`.
+#    Ensure that this delivery stream is created.
+#    https://ap-southeast-1.console.aws.amazon.com/firehose/home?#/wizard/nameAndSource
+
+# :: IMPORTANT:
 #    Ensure `eksctl`, `kubectl`, `jq`, and the `aws` CLI tools are on your machine.
 if ! [[ -x "$(command -v kubectl)" && -x "$(command -v eksctl)" && -x "$(command -v jq)" && -x "$(command -v aws)" ]]; then
   echo "This script requires kubectl, eksctl, jq, and aws."
@@ -10,6 +16,8 @@ if ! [[ -x "$(command -v kubectl)" && -x "$(command -v eksctl)" && -x "$(command
 fi
 
 # :: ---
+
+# :: TODO programatically create the Kinesis Firehose delivery stream
 
 # :: Create an EKS Fargate cluster
 eksctl create cluster -f ./aoc2020-cluster.yaml

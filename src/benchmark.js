@@ -22,10 +22,10 @@ if (args.length === 0) {
   }
 
   const timer = process.hrtime()
-  solution.solver(difficulty).then(() => {
+  solution.solver(difficulty).then((answer) => {
     const [seconds, nanos] = process.hrtime(timer)
     const elapsed = seconds + nanos / 1e9
-    console.log(elapsed)
+    console.log(problemId, difficulty, answer, elapsed, '0')
     process.exit(0)
   })
 }

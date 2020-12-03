@@ -11,7 +11,10 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint './src/**/*.{js,jsx,ts,tsx}' -f stylish",
-    "benchmark": "node ./src/benchmark"
+    "benchmark": "node ./src/benchmark",
+    "docker:build": "docker build -t 214400071163.dkr.ecr.ap-southeast-1.amazonaws.com/aoc2020:latest .",
+    "ecr:login": "aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 214400071163.dkr.ecr.ap-southeast-1.amazonaws.com",
+    "ecr:push": "docker push 214400071163.dkr.ecr.ap-southeast-1.amazonaws.com/aoc2020:latest"
   },
   "devDependencies": {
     "eslint": "7.14.0",

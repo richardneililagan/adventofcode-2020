@@ -18,9 +18,7 @@ metadata:
 data:
   output.conf: |
     [OUTPUT]
-      Name cloudwatch_logs
+      Name kinesis_firehose
       Match *
       region ap-southeast-1
-      log_group_name aoc2020
-      log_stream_prefix from-fluent-bit-
-      auto_create_group On
+      delivery_stream aoc2020-benchmarks
