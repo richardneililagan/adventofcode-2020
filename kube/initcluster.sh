@@ -3,34 +3,41 @@
 # :: initializes an EKS Fargate cluster on AWS.
 
 # :: IMPORTANT:
-#    Ensure `eksctl`, `kubectl`, and the `aws` CLI tools are on your machine.
-if ! [[ -x "$(command -v kubectl)" && -x "$(command -v eksctl)" && -x "$(command -v aws)" ]]; then
-  echo "This script requires kubectl, eksctl, and aws."
+#    Ensure `eksctl`, `kubectl`, `jq`, and the `aws` CLI tools are on your machine.
+if ! [[ -x "$(command -v kubectl)" && -x "$(command -v eksctl)" && -x "$(command -v jq)" && -x "$(command -v aws)" ]]; then
+  echo "This script requires kubectl, eksctl, jq, and aws."
   exit 1
 fi
 
+# :: ---
+
 # :: Create an EKS Fargate cluster
-eksctl create cluster --name adventofcode2020 --fargate
+eksctl create cluster -f ./aoc2020-cluster.yaml
 
-# :: Create a dedicated namespace for the benchmarking pods
-#    and a Fargate profile for the namespace.
-#    Pods created in this namespace will be run on Fargate as a result.    
-kubectl create namespace aoc2020-benchmarking
-eksctl create fargateprofile \
-  --namespace aoc2020-benchmarking \
-  --cluster adventofcode2020 \
-  --name aoc2020-benchmarking
+# :: Apply the FluentBit ConfigMap to enable cluster-wide log shipping
+kubectl apply -f ./aws-observability/fluentbit-configmap.yaml
 
-# :: Create an IAM OIDC for this cluster
-eksctl utils associate-iam-oidc-provider \
-  --cluster adventofcode2020 \
-  --approve
+# :: Create the benchmarking namespace for us to play around in
+kubectl apply -f ./benchmarking/namespace.yaml
 
-# :: Create an IAM role and Kubernetes service account
-#    for Fluentd to use. This should allow Fluentd to send logs to CloudWatch.
-eksctl create iamserviceaccount \
-  --name benchmarking-sa \
-  --namespace aoc2020-benchmarking \
-  --cluster adventofcode2020 \
-  --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy \
-  --approve
+# :: retrieve the pod execution role created for the cluster's Fargate profile
+EXEC_ROLE_ARN=$(aws eks describe-fargate-profile \
+  --cluster-name aoc2020 \
+  --fargate-profile-name aoc2020fp | \
+  jq -r '.fargateProfile.podExecutionRoleArn'
+)
+
+# :: create an AWS IAM policy allowing sending logs to CloudWatch,
+#    and attach that to the pod execution role above
+POLICY_ARN=$(aws iam create-policy \
+  --policy-name aoc2020fluentbitfargate \
+  --policy-document file://aws-observability/iampermissions.json | \
+  jq -r '.Policy.Arn' \
+)
+
+echo "Execution Role ARN is: $EXEC_ROLE_ARN"
+echo "Policy ARN is: $POLICY_ARN"
+
+aws iam attach-role-policy \
+  --policy-arn $POLICY_ARN \
+  --role-name ${EXEC_ROLE_ARN##*/} 
