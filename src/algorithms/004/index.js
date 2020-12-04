@@ -8,8 +8,6 @@ const solver = async (difficulty) => {
   const inputfile = getInputFile(__dirname, difficulty)
   const lines = await readFileToArray(inputfile)
 
-  // :: TODO prepare input
-
   switch (difficulty) {
     case 'easy':
       return await __easysolver(lines)
@@ -50,7 +48,51 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  // :: TODO
+  const REQUIRED_FIELDS = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
+  const passports = lines.reduce(
+    (a, line) => {
+      if (line.trim().length === 0) return [...a, {}]
+
+      const current = a[a.length - 1]
+      line.split(' ').forEach((fragment) => {
+        const [field, value] = fragment.split(':')
+        current[field] = value
+      })
+
+      return a
+    },
+    [{}]
+  )
+
+  const VALIDATORS = [
+    (p) => +p.byr >= 1920 && +p.byr <= 2002, // :: birth year
+    (p) => +p.iyr >= 2010 && +p.iyr <= 2020, // :: issue year
+    (p) => +p.eyr >= 2020 && +p.eyr <= 2030, // :: expiration year
+    (p) => !!p.hcl.match(/^\#[0-9a-f]{6}$/), // :: hair color
+    (p) => !!p.ecl.match(/^(amb|blu|brn|gry|grn|hzl|oth)$/), // :: eye color
+    (p) => !!p.pid.match(/^\d{9}$/), // :: passport ID
+    (p) => {
+      const match = p.hgt.match(/(?<metric>\d+)(?<unit>(cm|in))/)
+      if (!match) return false
+
+      const { metric, unit } = match.groups
+      switch (unit) {
+        case 'cm':
+          return +metric >= 150 && +metric <= 193
+        case 'in':
+          return +metric >= 59 && +metric <= 76
+        default:
+          return false
+      }
+    }, // :: height
+  ]
+
+  const valids = passports
+    .filter((passport) => REQUIRED_FIELDS.every((field) => !!passport[field]))
+    // :: check if the fields actually have valid values
+    .filter((passport) => VALIDATORS.every((validator) => validator(passport)))
+
+  return valids.length
 }
 
 module.exports = {
