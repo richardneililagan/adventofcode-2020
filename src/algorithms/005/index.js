@@ -24,7 +24,11 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  // :: TODO: probably should really do something like a binary search here :p
+  const seatids = lines.map(__getSeatId).sort()
+  const seatbefore = seatids.find((v, i) => seatids[i + 1] === v + 2)
+
+  return seatbefore + 1
 }
 
 /**
