@@ -40,7 +40,30 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  const groups = lines.reduce(
+    (a, line) => {
+      if (line.length === 0) return [...a, null]
+
+      const answers = line.split('')
+      const currentGroup = a[a.length - 1]
+      if (currentGroup === null) {
+        a[a.length - 1] = [...answers]
+        return a
+      }
+
+      // :: ---
+
+      const validated = currentGroup.filter((c) => answers.includes(c))
+      a[a.length - 1] = validated
+
+      return a
+    },
+    [null]
+  )
+
+  return groups.reduce((a, v, i) => {
+    return a + v.length
+  }, 0)
 }
 
 module.exports = { solver, name: PROBLEM_NAME }

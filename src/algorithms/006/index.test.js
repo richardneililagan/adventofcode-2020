@@ -33,10 +33,26 @@ it('solves the easy example', async () => {
   expect(answer).toBe(11)
 })
 
-// it('solves the hard example', async () => {
-//   const TEST_DATA = []
-//   readFileToArray.mockResolvedValue(TEST_DATA)
-//
-//   const answer = await solver('hard')
-//   expect(answer).toBe(0)
-// })
+it('solves the hard example', async () => {
+  const TEST_DATA = [
+    'abc',
+    '',
+    'a',
+    'b',
+    'c',
+    '',
+    'ab',
+    'ac',
+    '',
+    'a',
+    'a',
+    'a',
+    'a',
+    '',
+    'b',
+  ]
+  readFileToArray.mockResolvedValue(TEST_DATA)
+
+  const answer = await solver('hard')
+  expect(answer).toBe(6)
+})
