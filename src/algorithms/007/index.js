@@ -82,7 +82,49 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  // :: essentially the same algorithm ...
+  const links = lines
+    .map((line) => line.split(' contain '))
+    .map(([container, contents]) => [
+      container,
+      ...contents.replace('.', '').split(', '),
+    ])
+    .map((bags) => bags.map((bag) => bag.replace(/\s?bags?/i, '')))
+    .map((bag) => bag.map(__parsebag))
+    .reduce((a, [container, ...contents]) => {
+      if (!a[container.color]) {
+        a[container.color] = {
+          color: container.color,
+          parents: [],
+          children: [],
+        }
+      }
+
+      const __container = a[container.color]
+      contents
+        .filter((bag) => bag)
+        .forEach((bag) => {
+          if (!a[bag.color]) {
+            a[bag.color] = { color: bag.color, parents: [], children: [] }
+          }
+
+          // ... except we track the quantity of each bag inside the container bag
+          __container.children.push([bag.amount, a[bag.color]])
+          a[bag.color].parents.push(__container)
+        })
+
+      return a
+    }, {})
+
+  const __recurse = (bag) =>
+    1 + // :: the bag itself, plus ...
+    // :: the contents of the bags inside it
+    bag.children.reduce((a, [amount, bag]) => a + amount * __recurse(bag), 0)
+
+  return (
+    // :: subtract the actual shiny gold bag from the total
+    __recurse(links['shiny gold']) - 1
+  )
 }
 
 module.exports = { solver, name: PROBLEM_NAME }
