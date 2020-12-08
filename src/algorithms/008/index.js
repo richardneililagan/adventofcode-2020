@@ -18,54 +18,78 @@ const solver = async (difficulty) => {
   }
 }
 
-const __easysolver = async (lines) => {
-  // :: this generator function will yield accumulator values
-  //    until an infinite loop is detected
-  const interpreter = function* (__instructions) {
-    const instructions = __instructions.map((line) => {
-      const [operation, __arg] = line.split(' ')
-      return { operation, argument: Number(__arg), executed: false }
-    })
+// :: this generator function will yield accumulator values
+//    until either an infinite loop is detected,
+//    or if it attempts to execute after the last instruction in the list.
+const __interpreter = function* (__instructions) {
+  const instructions = __instructions.map((line) => {
+    const [operation, __arg] = line.split(' ')
+    return { operation, argument: Number(__arg), executed: false }
+  })
 
-    let accumulator = 0
-    let currentInstruction = 0
+  // :: ---
 
-    while (true) {
-      const instruction = instructions[currentInstruction]
-      const { operation, argument, executed } = instruction
-      if (executed) break // :: break the loop if this has already been executed
+  let acc = 0
+  let cur = 0
 
-      // :: mark this instruction as having already been run
-      instruction.executed = true
+  while (true) {
+    if (cur > instructions.length - 1) return yield true // :: program end
+    const instruction = instructions[cur]
+    const { operation, argument, executed } = instruction
 
-      switch (operation) {
-        case 'acc':
-          accumulator += argument
-          currentInstruction += 1
-          break
-        case 'jmp':
-          currentInstruction += argument
-          break
-        case 'nop':
-        // :: fallthrough
-        default:
-          // :: a bit pessimistic here --- if the operation does not match any
-          //    known operation, then the operation is treated as a `nop`.
-          currentInstruction += 1
-          break
-      }
+    if (executed) return yield false // :: encountered a repeated instruction
+    instruction.executed = true
 
-      yield accumulator
+    switch (operation) {
+      case 'acc':
+        acc += argument
+        cur += 1
+        break
+      case 'jmp':
+        cur += argument
+        break
+      case 'nop': // :: fallthrough
+      default:
+        cur += 1
     }
-  }
 
+    yield acc
+  }
+}
+
+const __easysolver = async (lines) => {
   // :: let the interpreter run in its entirety
-  const results = [...interpreter(lines)]
-  return results[results.length - 1]
+  const results = [...__interpreter(lines)]
+  return results[results.length - 2]
 }
 
 const __hardsolver = async (lines) => {
-  //
+  // :: get the lines with `jmp` or `nop` instructions
+  const candidateLineNumbers = lines
+    .map((line, i) => [line, i])
+    .filter(([line]) => line.match(/^(nop|jmp)/i))
+    .map(([, i]) => i)
+
+  // :: fun brute-force method :p
+  for (let i = 0; i < candidateLineNumbers.length; i++) {
+    // :: switch the instruction on the corresponding linenumber
+    const linenumber = candidateLineNumbers[i]
+    const instructions = [...lines]
+    const instruction = instructions[linenumber]
+
+    instructions[linenumber] = instruction.match(/^nop/i)
+      ? instruction.replace('nop', 'jmp')
+      : instruction.replace('jmp', 'nop')
+    // :: ---
+
+    const results = [...__interpreter(instructions)]
+    const isValid = results[results.length - 1]
+    if (isValid) return results[results.length - 2]
+  }
+
+  // :: we shouldn't reach this point
+  //    if we did stuff right :p
+  return null
 }
 
 module.exports = { solver, name: PROBLEM_NAME }

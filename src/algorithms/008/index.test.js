@@ -25,10 +25,18 @@ acc +6`.split('\n')
   expect(answer).toBe(5)
 })
 
-// it('solves the hard example', async () => {
-//   const TEST_DATA = []
-//   readFileToArray.mockResolvedValue(TEST_DATA)
-//
-//   const answer = await solver('hard')
-//   expect(answer).toBe(0)
-// })
+it('solves the hard example', async () => {
+  const TEST_DATA = `nop +0
+acc +1
+jmp +4
+acc +3
+jmp -3
+acc -99
+acc +1
+jmp -4
+acc +6`.split('\n')
+  readFileToArray.mockResolvedValue(TEST_DATA)
+
+  const answer = await solver('hard')
+  expect(answer).toBe(8)
+})
