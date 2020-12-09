@@ -47,8 +47,25 @@ const __easysolver = async (numbers) => {
   }
 }
 
-const __hardsolver = async (lines) => {
-  //
+const __hardsolver = async (numbers) => {
+  const invalid = await __easysolver(numbers)
+  const candidates = numbers.filter((n) => invalid > n)
+
+  for (let i = 0; i < candidates.length - 1; i++) {
+    for (let j = 1, sum = candidates[i]; i + j < candidates.length; j++) {
+      sum += candidates[i + j]
+      if (sum > invalid) break // :: we went over
+
+      if (sum === invalid) {
+        // :: a contiguous set has been found
+        const addends = [...candidates].splice(i, j + 1)
+        return Math.min(...addends) + Math.max(...addends)
+      }
+    }
+  }
+
+  // :: we shouldn't reach this point
+  return null
 }
 
 module.exports = { solver, __isValid, name: PROBLEM_NAME }
