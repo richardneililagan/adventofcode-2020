@@ -28,14 +28,18 @@ const __easysolver = async (lines) => {
   // :: parse into the seat layout
   const layout = lines.map((line, y) => {
     return Array(...line).map((char, x) => {
+      const adjacents = DELTA_VECTORS.map(([dx, dy]) => [x - dx, y - dy])
+        .filter(
+          ([x, y]) =>
+            x >= 0 && y >= 0 && x < lines[0].length && y < lines.length
+        )
+        .filter(([x, y]) => lines[y][x] === 'L')
+
       return char === 'L'
         ? {
             x,
             y,
-            adjacents: DELTA_VECTORS.map(([dx, dy]) => [x - dx, y - dy]).filter(
-              ([x, y]) =>
-                x >= 0 && y >= 0 && x < lines[0].length && y < lines.length
-            ),
+            adjacents,
             occupied: false,
           }
         : null
@@ -52,24 +56,14 @@ const __easysolver = async (lines) => {
   const tick = () => {
     const switchingSeats = seats
       .map((seat) => {
-        const adjacentStates = seat.adjacents
-          .map(([x, y]) => layout[y][x])
-          .filter((pos) => pos) // :: remove floor tiles
-          .map((seat) => seat.occupied)
+        const adjacentStates = seat.adjacents.map(
+          ([x, y]) => layout[y][x].occupied
+        )
+        const occupieds = adjacentStates.filter((state) => state).length
 
-        if (
-          seat.occupied &&
-          adjacentStates.filter((state) => state).length >= 4
-        ) {
-          return [seat.x, seat.y]
-        } else if (
-          !seat.occupied &&
-          adjacentStates.filter((state) => state).length === 0
-        ) {
-          return [seat.x, seat.y]
-        } else {
-          return null
-        }
+        if (seat.occupied && occupieds >= 4) return [seat.x, seat.y]
+        else if (!seat.occupied && occupieds === 0) return [seat.x, seat.y]
+        else return null
       })
       .filter((seat) => seat)
 
@@ -131,11 +125,6 @@ const __hardsolver = async (lines) => {
   const tick = () => {
     const switchingSeats = seats
       .map((seat) => {
-        // ###
-        seat.adjacents.forEach(([x, y]) => {
-          const s = layout[y][x]
-          if (!s) console.log(x, y, seat, s)
-        })
         const povStates = seat.adjacents.map(([x, y]) => layout[y][x].occupied)
         const occupieds = povStates.filter((state) => state).length
 
