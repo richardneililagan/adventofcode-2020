@@ -17,10 +17,10 @@ it('solves the easy example', async () => {
   expect(answer).toBe(25)
 })
 
-// it('solves the hard example', async () => {
-//   const TEST_DATA = []
-//   readFileToArray.mockResolvedValue(TEST_DATA)
-//
-//   const answer = await solver('hard')
-//   expect(answer).toBe(0)
-// })
+it('solves the hard example', async () => {
+  const TEST_DATA = ['F10', 'N3', 'F7', 'R90', 'F11']
+  readFileToArray.mockResolvedValue(TEST_DATA)
+
+  const answer = await solver('hard')
+  expect(answer).toBe(286)
+})

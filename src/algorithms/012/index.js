@@ -51,7 +51,53 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  const state = {
+    ship: { x: 0, y: 0 },
+    waypoint: { x: 10, y: 1 }, // :: 10 units east, 1 unit north
+  }
+
+  const ACTIONS = {
+    N: (value) => (state.waypoint.y += value),
+    S: (value) => (state.waypoint.y -= value),
+    E: (value) => (state.waypoint.x += value),
+    W: (value) => (state.waypoint.x -= value),
+    L: (value) => {
+      // :: value is angle of rotation
+      const __cos = Math.cos(rads(value))
+      const __sin = Math.sin(rads(value))
+
+      const { x, y } = state.waypoint
+      state.waypoint.x = Math.round(x * __cos - y * __sin)
+      state.waypoint.y = Math.round(x * __sin + y * __cos)
+    },
+    R: (value) => {
+      // :: value is angle of rotation
+      // :: this is clockwise, so negative rotation
+      const __cos = Math.cos(rads(-value))
+      const __sin = Math.sin(rads(-value))
+
+      const { x, y } = state.waypoint
+      state.waypoint.x = Math.round(x * __cos - y * __sin)
+      state.waypoint.y = Math.round(x * __sin + y * __cos)
+    },
+    F: (value) => {
+      state.ship.x += value * state.waypoint.x
+      state.ship.y += value * state.waypoint.y
+    },
+  }
+
+  lines
+    .map((line) => {
+      const { action, value } = line.match(
+        /(?<action>[nsewrlf])(?<value>-?\d*)/i
+      ).groups
+
+      return { action, value: Number(value) }
+    })
+    .forEach(({ action, value }) => ACTIONS[action](value))
+
+  const manhattan = Math.abs(state.ship.x) + Math.abs(state.ship.y)
+  return manhattan
 }
 
 module.exports = { solver, name: PROBLEM_NAME }
