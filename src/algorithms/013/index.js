@@ -34,7 +34,42 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  // :: ignore first line of input
+  //    [busid, remainder]
+  const buses = lines[1]
+    .split(',')
+    .map((id, i) => {
+      if (id === 'x') return null
+      else return [BigInt(id), BigInt(id - i)]
+    })
+    .filter((id) => id)
+
+  // :: chinese remainder theorem black magic fuckery
+  // :: we expect m, n to be BigInt
+  const invert = (m, n) => {
+    if (n === 1) return 1
+    // :: ---
+
+    let [a, b] = [m, n]
+    let [x, y] = [0n, 1n]
+
+    while (a > 1) {
+      const q = a / b
+      ;[a, b] = [b, a % b]
+      ;[x, y] = [y - q * x, x]
+    }
+
+    return y < 0 ? y + n : y
+  }
+
+  const kproduct = buses.reduce((a, [busid]) => a * busid, 1n)
+  const ksum = buses.reduce(
+    (a, [busid, remainder]) =>
+      a + ((remainder * kproduct) / busid) * invert(kproduct / busid, busid),
+    0n
+  )
+
+  return String(ksum % kproduct) // :: ehhhhhhh.
 }
 
 module.exports = { solver, name: PROBLEM_NAME }
