@@ -54,7 +54,51 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  const to36b = (n) => {
+    const binary = Number(n).toString(2).split('').map(Number)
+    const padding = Array(36 - binary.length).fill(0)
+    return [...padding, ...binary]
+  }
+
+  const recurse = ([addresshead, ...addresstail], [maskhead, ...masktail]) => {
+    if (addresshead === undefined) return ['']
+    const resolvedtail = recurse(addresstail, masktail)
+
+    if (Number(maskhead) === 0)
+      return resolvedtail.map((tail) => addresshead + tail)
+    else if (Number(maskhead) === 1)
+      return resolvedtail.map((tail) => '1' + tail)
+    else
+      return [
+        ...resolvedtail.map((tail) => '0' + tail),
+        ...resolvedtail.map((tail) => '1' + tail),
+      ]
+  }
+
+  const { writes } = lines
+    .map((line) => line.split(' = '))
+    .map(([operation, argument]) => {
+      if (operation === 'mask') return [operation, argument.split('')]
+      // :: ---
+      return [operation, Number(argument)]
+    })
+    .reduce(
+      (a, [operation, argument]) => {
+        if (operation === 'mask') {
+          a.mask = argument
+          return a
+        }
+        // :: ---
+        const { address } = operation.match(/mem\[(?<address>\d*)\]/i).groups
+        const addresses = recurse(to36b(address), a.mask)
+        addresses.forEach((addy) => (a.writes[addy] = argument))
+
+        return a
+      },
+      { mask: [], writes: {} }
+    )
+
+  return Object.values(writes).reduce((a, v) => a + v, 0)
 }
 
 module.exports = { solver, name: PROBLEM_NAME }

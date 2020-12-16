@@ -22,10 +22,15 @@ it('solves the easy example', async () => {
   expect(answer).toBe(165)
 })
 
-// it('solves the hard example', async () => {
-//   const TEST_DATA = []
-//   readFileToArray.mockResolvedValue(TEST_DATA)
-//
-//   const answer = await solver('hard')
-//   expect(answer).toBe(0)
-// })
+it('solves the hard example', async () => {
+  const TEST_DATA = [
+    'mask = 000000000000000000000000000000X1001X',
+    'mem[42] = 100',
+    'mask = 00000000000000000000000000000000X0XX',
+    'mem[26] = 1',
+  ]
+  readFileToArray.mockResolvedValue(TEST_DATA)
+
+  const answer = await solver('hard')
+  expect(answer).toBe(208)
+})
