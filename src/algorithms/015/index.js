@@ -23,7 +23,7 @@ const __easysolver = async (lines) => {
 
   let turnNumber = 0
   let lastNumberSpoken = null
-  const tracker = []
+  const tracker = {}
 
   while (turnNumber < 2020) {
     turnNumber += 1
@@ -61,7 +61,46 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  // :: same algorithm as before
+  const STARTING_NUMBERS = lines[0].split(',').map(Number)
+
+  let turnNumber = 0
+  let lastNumberSpoken = null
+  const tracker = {}
+
+  while (turnNumber < 30000000) {
+    turnNumber += 1
+
+    // :: a nice characteristic of the input is that no numbers are repeated
+    //    so we can make this nice short-circuit here
+    if (turnNumber <= STARTING_NUMBERS.length) {
+      lastNumberSpoken = STARTING_NUMBERS[turnNumber - 1]
+      tracker[lastNumberSpoken] = [turnNumber]
+      continue
+    }
+    // :: ---
+
+    // :: else, we look at the last number spoken, and look at the history
+    //    for that number, if it already exists
+    const spokenHistory = tracker[lastNumberSpoken]
+    if (spokenHistory.length === 1) {
+      // :: first time spoken
+      lastNumberSpoken = 0
+    } else {
+      // :: spoken a few times before
+      lastNumberSpoken = spokenHistory[0] - spokenHistory[1]
+    }
+
+    // :: track the spoken number
+    if (tracker[lastNumberSpoken] === undefined) {
+      tracker[lastNumberSpoken] = [turnNumber]
+    } else {
+      tracker[lastNumberSpoken][1] = tracker[lastNumberSpoken][0]
+      tracker[lastNumberSpoken][0] = turnNumber
+    }
+  }
+
+  return lastNumberSpoken
 }
 
 module.exports = { solver, name: PROBLEM_NAME }
