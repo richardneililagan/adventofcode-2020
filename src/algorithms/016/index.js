@@ -48,7 +48,7 @@ const __parseRules = (lines) => {
 const __easysolver = async (lines) => {
   // :: composer function to check for validity of a number with respect to a rule
   const RULECHECK = (min, max) => (n) => n >= min && n <= max
-  const [rules, myTicket, nearbyTickets] = __parseRules(lines)
+  const [rules, , nearbyTickets] = __parseRules(lines)
 
   const validators = rules.reduce((a, { conditions }) => {
     return [
@@ -67,7 +67,61 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  const RULECHECK = (min, max) => (n) => n >= min && n <= max
+  const [__rules, myTicket, nearbyTickets] = __parseRules(lines)
+
+  const ticketFieldsCount = myTicket.length
+
+  const rules = __rules.map(({ rulename, conditions }) => ({
+    rulename,
+    ticketFieldCandidates: Array(ticketFieldsCount).fill(true),
+    conditions: conditions.map((c) => {
+      const [min, max] = c.split('-')
+      return RULECHECK(Number(min), Number(max))
+    }),
+  }))
+
+  const validators = rules.reduce(
+    (a, { conditions }) => [...a, ...conditions],
+    []
+  )
+
+  const validTickets = nearbyTickets.filter((ticket) =>
+    ticket.every((n) => validators.some((v) => v(n)))
+  )
+
+  // :: yuck
+  for (let i = 0; i < rules.length; i++) {
+    for (let j = 0; j < validTickets.length; j++) {
+      for (let k = 0; k < ticketFieldsCount; k++) {
+        rules[i].ticketFieldCandidates[k] &= rules[i].conditions.some((c) =>
+          c(validTickets[j][k])
+        )
+      }
+    }
+  }
+
+  rules.forEach((rule) => {
+    rule.specificity = rule.ticketFieldCandidates.reduce((a, v) => a + v, 0)
+  })
+
+  const FIELD_MAP = Array(ticketFieldsCount).fill(null)
+
+  rules
+    .sort((a, b) => Number(a.specificity) - Number(b.specificity))
+    .forEach((rule) => {
+      const fieldIndex = rule.ticketFieldCandidates.findIndex(
+        (field, i) => !!field && FIELD_MAP[i] === null
+      )
+      FIELD_MAP[fieldIndex] = rule
+      rule.fieldIndex = fieldIndex
+    })
+
+  const targetFields = rules
+    .filter(({ rulename }) => rulename.startsWith('departure'))
+    .map(({ fieldIndex }) => fieldIndex)
+
+  return targetFields.reduce((a, v) => a * myTicket[v], 1)
 }
 
 module.exports = { solver, name: PROBLEM_NAME }
