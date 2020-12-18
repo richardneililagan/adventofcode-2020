@@ -111,6 +111,7 @@ Times in seconds.
 | Day 14: **Docking Data**            | `0.22312902238888885`  | `6.328915380633331`   |
 | Day 15: **Rambunctious Recitation** | `0.04512888419999998`  | `too long :p`         |
 | Day 16: **Ticket Translation**      | `0.09970896771111112`  | `0.6559258460555555`  |
+| Day 17: **Conway Cubes**            | `0.6162428340555557`   | `10.739292523166666`  |
 
 ---
 

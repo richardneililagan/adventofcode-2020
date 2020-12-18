@@ -85,7 +85,53 @@ const __easysolver = async (lines) => {
 }
 
 const __hardsolver = async (lines) => {
-  //
+  // :: pretty much the same algorithm, adapted for 4D
+  const KEY = (x, y, z, w) => `${x}|${y}|${z}|${w}`
+  const SPACE = {}
+  lines.forEach((line, y) =>
+    line
+      .split('')
+      .forEach((char, x) => char === '#' && (SPACE[KEY(x, y, 0, 0)] = true))
+  )
+  const REACH = [-1, 0, 1]
+  const INFLUENCE_DELTAS = REACH.reduce(
+    (a, x) => [
+      ...a,
+      ...REACH.reduce(
+        (a, y) => [
+          ...a,
+          ...REACH.reduce(
+            (a, z) => [...a, ...REACH.map((w) => [x, y, z, w])],
+            []
+          ),
+        ],
+        []
+      ),
+    ],
+    []
+  ).filter(([x, y, z, w]) => !(x === 0 && y === 0 && z === 0 && w === 0))
+
+  const tick = () => {
+    const INFLUENCE = {}
+    Object.entries(SPACE)
+      .filter(([, value]) => value)
+      .forEach(([key]) => {
+        const [x, y, z, w] = key.split('|').map(Number)
+        if (INFLUENCE[key] === undefined) INFLUENCE[key] = 0
+        INFLUENCE_DELTAS.forEach(([dx, dy, dz, dw]) => {
+          const key = KEY(x + dx, y + dy, z + dz, w + dw)
+          INFLUENCE[key] = (INFLUENCE[key] || 0) + 1
+        })
+      })
+
+    Object.entries(INFLUENCE).forEach(([key, influence]) => {
+      if (SPACE[key]) SPACE[key] = influence === 2 || influence === 3
+      else SPACE[key] = influence === 3
+    })
+  }
+
+  Array(6).fill(0).forEach(tick)
+  return Object.values(SPACE).filter((state) => state).length
 }
 
 module.exports = { solver, name: PROBLEM_NAME }
