@@ -112,6 +112,7 @@ Times in seconds.
 | Day 15: **Rambunctious Recitation** | `0.04512888419999998`  | `too long :p`         |
 | Day 16: **Ticket Translation**      | `0.09970896771111112`  | `0.6559258460555555`  |
 | Day 17: **Conway Cubes**            | `0.6162428340555557`   | `10.739292523166666`  |
+| Day 18: **Operation Order**         | `1.0002100474888893`   | `3.0875326382555563`  |
 
 ---
 
