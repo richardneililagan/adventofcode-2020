@@ -51,27 +51,33 @@ const __easysolver = async (lines) => {
   const tick = () => {
     const INFLUENCE = {} // :: tracks active Conway Cube influence on any other Conway Cube
     Object.entries(SPACE)
-      .filter(([, value]) => value) // :: we only wanna see active cube influence
+      .filter(([, state]) => state) // :: get all active cubes
       .forEach(([key]) => {
         const [x, y, z] = key.split('|').map(Number)
 
         // :: make sure we also (eventually) consider the current cube for influence
         if (INFLUENCE[key] === undefined) INFLUENCE[key] = 0
 
-        // :: collate how many (active) cubes are exerting influence on any other cube
+        // :: count how many (active) cubes are exerting influence on any other cube
         INFLUENCE_DELTAS.forEach(([dx, dy, dz]) => {
           const key = KEY(x + dx, y + dy, z + dz)
+
+          // :: so we just add the current cube's influence to the current point
+          //    being considered --- if the point hasn't been seen before, it will
+          //    be undefined, so we short into a 0 so we can perform arithmetic.
           INFLUENCE[key] = (INFLUENCE[key] || 0) + 1
         })
       })
 
     // :: evaluate influences with the current Conway Cube activation states
     Object.entries(INFLUENCE).forEach(([key, influence]) => {
+      // :: `influence` will functionally be
+      //    "how many neighbor cubes are currently active?"
       if (SPACE[key]) {
-        // :: cube is currently active
+        // :: current cube is currently active
         SPACE[key] = influence === 2 || influence === 3
       } else {
-        // :: cube is not currently active
+        // :: current cube is not currently active
         SPACE[key] = influence === 3
       }
     })
