@@ -120,7 +120,7 @@ const __hardsolver = async (lines) => {
   const tick = () => {
     const INFLUENCE = {}
     Object.entries(SPACE)
-      .filter(([, value]) => value)
+      .filter(([, state]) => state)
       .forEach(([key]) => {
         const [x, y, z, w] = key.split('|').map(Number)
         if (INFLUENCE[key] === undefined) INFLUENCE[key] = 0
